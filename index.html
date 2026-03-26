@@ -854,7 +854,10 @@
             align-items: center;
         }
 
-        .card-meta {}
+        .card-meta {
+            display: flex;
+            flex-direction: column;
+        }
 
         .card-cat {
             font-size: 0.68rem;
@@ -1347,6 +1350,24 @@
             font-size: 0.9rem;
         }
 
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
+        }
+
+        .form-group label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            opacity: 0.85;
+            margin-bottom: 2px;
+            padding-left: 2px;
+        }
+
         /* ── Responsive ────────────────────────────────────────────────── */
         @media (max-width: 960px) {
             .stats-grid {
@@ -1781,13 +1802,28 @@
                     přímý e-mail</a>
                 <button class="contact-btn accent" id="reveal-form">Vyplnit formulář</button>
             </div>
-            <form id="contact-form">
-                <input type="text" id="form-name" placeholder="Vaše jméno" required>
-                <input type="email" id="form-email" placeholder="Váš e-mail" required>
-                <textarea id="form-message" placeholder="Jak vám můžeme pomoci?" required></textarea>
-                <button type="submit" class="contact-btn accent">Odeslat poptávku</button>
+            <form id="contact-form" action="https://formspree.io/f/xbdpjvra" method="POST">
+                <div class="form-group">
+                    <label for="form-name">Name</label>
+                    <input type="text" name="name" id="form-name" placeholder="Your Name" required>
+                </div>
+                <div class="form-group">
+                    <label for="form-email">Email</label>
+                    <input type="email" name="email" id="form-email" placeholder="Your Email" required>
+                </div>
+                <!-- Honeypot field for spam protection -->
+                <div style="display:none">
+                    <label>Keep this field empty: <input name="_gotcha"></label>
+                </div>
+                <div class="form-group">
+                    <label for="form-message">Message</label>
+                    <textarea name="message" id="form-message" placeholder="How can we help?" required></textarea>
+                </div>
+                <!-- Redirect after successful submission -->
+                <input type="hidden" name="_redirect" value="/thank-you.html">
+                <button type="submit" class="contact-btn accent">Send Message</button>
             </form>
-            <div class="success-msg" id="form-success">Děkujeme! Váš prohlížeč nyní otevře e-mailového klienta.</div>
+            <div class="success-msg" id="form-success">Thank you! Your message has been sent.</div>
         </div>
     </div>
 
@@ -1970,47 +2006,11 @@
         modal.addEventListener('click', (e) => { if (e.target === modal) closeMod.click(); });
         revealFormBtn.addEventListener('click', () => { contactOpts.style.display = 'none'; contactForm.style.display = 'flex'; });
 
-        // ── Form Submissions ────────────────────────────────────────────────────
-        // ── Navbar scroll
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => { navbar.classList.toggle('scrolled', window.scrollY > 50); });
+        // (Duplicates removed)
 
-        // ── Scroll Reveal
-        const io = new IntersectionObserver((entries) => {
-            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
-        }, { threshold: 0.12 });
-        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-        // ── Contact Modal + Form
-        contactForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('form-name').value;
-            const email = document.getElementById('form-email').value;
-            const message = document.getElementById('form-message').value;
-            const submitBtn = contactForm.querySelector('button[type="submit"]');
-            submitBtn.textContent = 'Odesílám…';
-            submitBtn.disabled = true;
-            try {
-                const res = await fetch('https://contact-form.webyhk.workers.dev', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, message })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    contactForm.style.display = 'none';
-                    formSuccess.style.display = 'block';
-                } else {
-                    alert('Něco se pokazilo, zkuste to znovu.');
-                    submitBtn.textContent = 'Odeslat poptávku';
-                    submitBtn.disabled = false;
-                }
-            } catch {
-                alert('Chyba připojení, zkuste to znovu.');
-                submitBtn.textContent = 'Odeslat poptávku';
-                submitBtn.disabled = false;
-            }
-        });
+        // ── Contact Modal + Form Handling
+        // Standard POST submission with Formspree handled via HTML attributes.
+        // Basic client-side validation is enforced by 'required' and 'type="email"'.
 
     </script>
 </body>
